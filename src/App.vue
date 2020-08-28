@@ -1,32 +1,65 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div class="content">
+      <el-scrollbar style="height:100%">
+        <transition name='slide-left' mode="out-in">
+          <router-view/>
+        </transition>
+      </el-scrollbar>
     </div>
-    <router-view/>
+    <home-right-btn /> 
   </div>
 </template>
 
-<style lang="less">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+<script>
+import HomeRightBtn from '@/components/HomeRightBtn'
+export default {
+  components:{
+    HomeRightBtn
   }
 }
+</script>
+
+<style lang="less">
+  body{
+    padding: 0;
+    margin: 0;
+  }
+  a{
+    color: #000;
+    text-decoration: none;
+  }
+  .slide-left-enter-active {
+    transition: all .3s ease;
+  }
+  .slide-left-leave-active {
+    transition: all .3s ease;
+  }
+  .slide-left-enter, .slide-left-leave-to {
+    opacity: 0;
+  }
+  #app{
+    background: rgba(140, 197, 255, .5);
+    width: 100vw;
+    height: 100vh;
+
+    .content{
+      position: relative;
+      width: 60vw;
+      height: 95vh;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      background: rgba(255,255,255,1);
+      border-radius: 10px;
+      box-shadow: 0 2px 2px rgba(10,16,20,.24),0 0 2px rgba(10,16,20,.12);
+
+    }
+
+    .el-scrollbar__wrap {
+      overflow-x: hidden;
+    }
+  }
 </style>

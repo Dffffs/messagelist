@@ -1,4 +1,4 @@
-# meassgelist
+# messagelist
 
 ## Project setup
 ```
