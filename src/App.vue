@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="content">
+    <div class="app-content">
       <el-scrollbar style="height:100%">
         <transition name='slide-left' mode="out-in">
           <router-view/>
@@ -43,7 +43,7 @@ export default {
     width: 100vw;
     height: 100vh;
 
-    .content{
+    .app-content{
       position: relative;
       width: 60vw;
       height: 95vh;

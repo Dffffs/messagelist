@@ -32,7 +32,7 @@ export default {
             text: '我的'
         },
         {
-            url: '/center',
+            url: '/',
             icon: 'el-icon-school',
             text: '广场'
         }
@@ -58,7 +58,7 @@ export default {
         .btnArr{
             width: 200px;
             display: flex;
-            .router-link-active{
+            .router-link-exact-active{
                 color: #409EFF;
             }
             .seeMore{
