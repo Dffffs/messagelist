@@ -13,7 +13,7 @@ export const translate = {
     apiUrl: 'http://api.fanyi.baidu.com/api/trans/vip/translate',
     // 编码MD5 
     toMd5(){
-
+        
     },
     // 翻译成对应语言
     toZhCn(){
