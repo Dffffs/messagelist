@@ -24,6 +24,7 @@ export default {
   },
   methods:{
     login(forminfo){
+      let { componentname } = this 
       let { name, password } = forminfo
       const { User } = AV 
       User.logIn(name, password).then((user) => {
@@ -57,8 +58,8 @@ export default {
   .content{
     width: 15vw;
     position: absolute;
-    top: 50%;
-    left: 45%;
+    top: 45%;
+    left: 49%;
     transform: translate(-50%, -50%);
     // background: #eee;
     display: flex;

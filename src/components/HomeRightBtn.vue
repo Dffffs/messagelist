@@ -54,7 +54,8 @@ export default {
     .homeRightBtn{
         position: absolute; 
         top: 2.5vh;
-        right: 9vw;
+        // right: 9vw;
+        left: 5px;
         .btnArr{
             width: 200px;
             display: flex;

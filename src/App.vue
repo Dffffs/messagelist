@@ -45,7 +45,7 @@ export default {
 
     .app-content{
       position: relative;
-      width: 60vw;
+      width: 80vw;
       height: 95vh;
       padding: 10px 20px;
       box-sizing: border-box;
