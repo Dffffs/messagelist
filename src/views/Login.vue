@@ -12,6 +12,7 @@
 import { AV } from '@/public/ApiBase.js'
 import LoginForm from '@/components/LoginForm.vue'
 import RegisterForm from '@/components/RegisterForm.vue'
+import { translate } from '@/public/translate.js'
 export default {
   components: {
     RegisterForm,
@@ -36,6 +37,7 @@ export default {
     }
   },
   mounted(){
+    translate.toZhCn('this is row')
     this.$bus.$on('registerOrLogin', (forminfo) => {
       this.login(forminfo)
     })
