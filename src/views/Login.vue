@@ -25,19 +25,20 @@ export default {
   },
   methods:{
     login(forminfo){
-      let { componentname } = this 
-      let { name, password } = forminfo
-      const { User } = AV 
-      User.logIn(name, password).then((user) => {
-        // 登录成功
-      }, (error) => {
-        console.log(error)
-        // 登录失败（可能是密码错误）
-      });
+      translate.toZhCn('code')
+      // let { componentname } = this 
+      // let { name, password } = forminfo
+      // const { User } = AV 
+      // User.logIn(name, password).then((user) => {
+      //   // 登录成功
+      // }, (error) => {
+      //   console.log(error)
+      //   // 登录失败（可能是密码错误）
+      // });
     }
   },
   mounted(){
-    translate.toZhCn('this is row')
+    
     this.$bus.$on('registerOrLogin', (forminfo) => {
       this.login(forminfo)
     })

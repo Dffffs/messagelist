@@ -10,10 +10,10 @@ module.exports = {
         hotOnly: false, //是否开启热更新
         proxy: {
             '/api': {
-                target: 'https://fanyi-api.baidu.com', //API服务器的地址
+                target: 'http://api.fanyi.baidu.com/', //API服务器的地址
                 changeOrigin: true,
                 pathRewrite: {
-                    '^/api': ''
+                    '^/api': 'api'
                 }
             }
         },

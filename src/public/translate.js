@@ -12,7 +12,7 @@
 import md5 from 'blueimp-md5'
 import axios from 'axios'
 export const translate = {
-    apiUrl: '/trans/vip/translate',
+    apiUrl: '/api/trans/vip/translate',
     // 翻译成对应语言
     async toZhCn(q){
         let from = 'auto',
@@ -22,7 +22,10 @@ export const translate = {
             sign = '',
             key = '8JVCJTRvVQonkn56iZIB'
         sign = md5( appid + q + salt + key)
-        let res = await axios.get(this.apiUrl, {
+        console.log(sign, appid + q + salt + key)
+        let res = await axios({
+            url: this.apiUrl,
+            method: 'get',
             params: {
                 q : encodeURIComponent(q),
                 from,
@@ -30,6 +33,9 @@ export const translate = {
                 appid,
                 salt,
                 sign
+            },
+            headers:{
+                'Content-Type': 'application/json'
             }
         }).catch(err => {
             console.log(err)
