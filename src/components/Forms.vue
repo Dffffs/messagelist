@@ -52,7 +52,16 @@
       },
       otherClick(){
         this.$bus.$emit('cancleOrRegister')
+      },
+      handle(){
+
       }
+    },
+    created(){
+    },
+    beforeDestroy(){
+      this.$bus.$off('cancleOrRegister', this.handle)
+      this.$bus.$off('registerOrLogin', this.handle)
     }
   }
 </script>

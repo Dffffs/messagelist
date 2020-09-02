@@ -21,6 +21,7 @@ export const translate = {
             salt = parseInt( Math.random() * 1000000000 + 1),
             sign = '',
             key = '8JVCJTRvVQonkn56iZIB'
+        // appid+q+salt+密钥
         sign = md5( appid + q + salt + key)
         console.log(sign, appid + q + salt + key)
         let res = await axios({

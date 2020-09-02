@@ -11,7 +11,7 @@
                     <i :class="item.icon"></i>
                     <span>{{item.text}}</span>
                 </router-link>
-                <div class="seeMoreOne">
+                <div class="seeMoreOne" @click="bak">
                     <i class="el-icon-setting"></i>
                     <span>退出登陆</span>
                 </div>
@@ -37,7 +37,16 @@ export default {
             text: '广场'
         }
       ]
-    })
+    }),
+    methods: {
+        bak(){
+            localStorage.clear()
+            this.$router.replace({
+                path:'/login'
+            })
+            location.reload()
+        }
+    }
 }
 </script>
 
