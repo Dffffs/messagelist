@@ -15,10 +15,12 @@ export default {
       ruleForm:{},
       rules: {
         name : [
-          { required: true, message: '请填写用户名', trigger: 'blur' }
+          { required: true, message: '请填写用户名', trigger: 'blur' },
+          { min: 5, max: 12, message: '长度在 5 到 12 个字符', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '请填写密码', trigger: 'blur' }
+          { required: true, message: '请填写密码', trigger: 'blur' },
+          { min: 5, max: 12, message: '长度在 5 到 12 个字符', trigger: 'blur' }
         ]
       },
       formItem: [

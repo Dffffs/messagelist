@@ -17,3 +17,14 @@ export const deepCopy = function (Obj) {
         return Obj
     }
 }
+
+// 序列化时间
+export const formatTime = function(time = new Date(), str = '-'){
+    let year = time.getFullYear()
+    let month = time.getMonth() + 1
+    let day = time.getDate()
+
+    let padZ = (n) => String(n).padStart(2,0)
+
+    return `${year}${str}${padZ(month)}${str}${padZ(day)}`
+}

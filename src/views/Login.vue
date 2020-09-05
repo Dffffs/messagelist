@@ -33,6 +33,9 @@ export default {
           // 登录成功
           localStorage.setItem('userId', user.id);
           localStorage.setItem('userInfo', JSON.stringify(user));
+
+          this.$store.commit('loginInfo', user)
+
           this.$router.replace({
             path: '/'
           })

@@ -1,11 +1,9 @@
 <template>
   <div id="app">
     <div class="app-content">
-      <el-scrollbar style="height:100%">
-        <transition name='slide-left' mode="out-in">
-          <router-view/>
-        </transition>
-      </el-scrollbar>
+      <transition name='slide-left' mode="out-in">
+        <router-view/>
+      </transition>
     </div>
     <home-right-btn /> 
   </div>

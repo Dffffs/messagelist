@@ -1,16 +1,221 @@
 <template>
-    <div class="onRow">
-        onrow
+    <div class="onRow" v-loading="loading">
+        <el-scrollbar
+            style="height: 100%;"
+            wrap-class="scrollbar-wrapper">
+            <div
+              class="infinite-list"
+              v-infinite-scroll="load"
+              infinite-scroll-delay="200">
+              <transition-group name="list" tag="p">
+                  <div v-for="(item,i) in rowData" :key="`${item.time}_${i}`" class="one infinite-list-item">
+                        <div class="top">
+                            <div class="left">
+                                <img :src="item.pic">
+                                <span>{{item.userName}}</span>
+                            </div>
+                            <div class="right">{{formatTime(new Date(item.time))}}</div>
+                        </div>
+                        <div class="center">
+                            <p>{{item.text}}</p>
+                            <div>
+                                <img v-for="(i, i1) in item.attachment" :key="i1" :src="i">
+                            </div>
+                        </div>
+                        <div class="bottom">
+                            <div class="nice">
+                                <img src="@/assets/zan.png" />
+                                <span>0</span>
+                            </div>
+                            <!-- <div class="judge">
+                                <img src="" />
+                            </div> -->
+                        </div>
+                    </div>
+                    <!-- <div class="loading" v-if="loading" :key="`_${Math.random()*10000}`" v-loading="loading"></div> -->
+                    <p class="end" v-if="end" :key="`_${Math.random()*10000}`">没有更多了</p>
+              </transition-group>
+            </div>
+          </el-scrollbar>
     </div>
 </template>
 <script>
+import { AV } from '@/public/ApiBase.js'
+import { formatTime } from '@/public/commonFun.js'
+const AVs = require('leancloud-storage/live-query');
 export default {
-    
+    data(){
+        return {
+            skip: 0, // 跳过的条数
+            limit: 10, //拉取多少数据
+            i: 1, //第几次拉取数据
+            rowData: [],
+            end: false,
+            loading: false
+        }
+    },
+    computed: { },
+    methods:{
+        formatTime,
+        load(){
+            let { i, skip, limit, end } = this
+            if (end) {
+                return
+            }
+            this.getRowData( limit * i , limit,'add')
+            this.i ++
+            console.log('load', this.loading)
+        },
+        getRowData(skip, limit, type){
+            this.loading = true
+            // 获取row
+            const query = new AV.Query('row');
+            let { rowData } = this
+            let data = []
+            // 按 createdAt 降序排列
+            query.descending('time');
+
+            // 同时获取附件中的文件
+            query.include('attachments');
+            query.limit(limit);
+            query.skip(skip);
+
+            query.find().then((row) => {
+                this.loading = false
+                if (!row.length) {
+                    this.end = true
+                }
+                row.forEach((res,i) => {
+                    let obj = { 
+                        pic: res.get('pic'), 
+                        text: res.get('text'), 
+                        time: res.get('time'), 
+                        userName: res.get('userName'),
+                        attachment: []
+                    }
+                    const attachments = res.get('attachments');
+
+                    attachments.forEach((attachment) => {
+                        obj.attachment.push(attachment.get('url'))
+                    });
+                    data.push(obj)
+                });
+                console.log(data)
+                if (type === 'update') {
+                    this.rowData = data
+                } else {
+                    this.rowData = rowData.concat(data)
+                }
+            }).catch(err => {
+                this.loading = false
+            });
+        },
+        // 订阅消息
+        // subscribe(){
+        //     const query = new AVs.Query('row');
+        //     query.subscribe().then((liveQuery) => {
+        //         // 订阅成功
+        //         liveQuery.on('create', (row) => {
+        //             console.log(row); // 更新作品集
+        //         });
+        //     });
+        // }
+    },
+    mounted(){
+        let { skip, limit } = this
+        this.getRowData(skip, limit, 'update')
+        // this.subscribe()
+    }
 }
 </script>
 <style lang="less" scoped>
+    .list-item {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    .list-enter-active, .list-leave-active {
+        transition: all 1s;
+    }
+    .list-enter, .list-leave-to
+    /* .list-leave-active for below version 2.1.8 */ {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    .end, .loading{
+        text-align: center;
+        border-top: 1px solid #eee;
+        height: 50px;
+        line-height: 50px;
+        color: #bbb;
+    }
     .onRow{
-        
+        flex: 1;
+        height: 500px;
+        .infinite-list{
+            height: 100%;
+        }
+        .one{
+            box-sizing: border-box;
+            max-height: 320px;
+            padding: 10px 15px;
+            border: 1px solid #ededed;
+            border-radius: 20px;
+            box-shadow: 0 2px 2px rgba(10, 16, 20, 0.24), 0 0 2px rgba(10, 16, 20, 0.12);
+            font-size: 13px;
+            font-family: '微软雅黑';
+            margin-bottom: 10px;
+            .top{
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid rgba(10, 16, 20, 0.1);
+                padding-bottom: 10px;
+                .left{
+                    display: flex;
+                    align-items: center;
+                    img{
+                        width: 50px;
+                        height: 50px;
+                        margin-right: 15px;
+                    }
+                }
+                .right{
+                    color: #ccc;
+                }
+            }
+            .center{
+                font-size: 15px;
+
+                img{
+                    width: 150px;
+                    height: 150px;
+                    margin-right: 10px;
+                }
+            }
+            .bottom{
+
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                div.like{
+                   color: #409EFF; 
+                }
+                div{
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    font-size: 16px;
+                    color: #aaa;
+                    img{
+                        width: 20px;
+                        height: 20px;
+                        margin-right: 5px;
+                    }
+
+                }
+                
+            }   
+        }
     }
 </style>
 
