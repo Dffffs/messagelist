@@ -72,7 +72,7 @@ export default {
             const query = new AV.Query('row');
             let { rowData } = this
             let data = []
-            // 按 createdAt 降序排列
+            // 按 time 时间戳 降序排列
             query.descending('time');
 
             // 同时获取附件中的文件
