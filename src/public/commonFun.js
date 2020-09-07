@@ -28,3 +28,10 @@ export const formatTime = function(time = new Date(), str = '-'){
 
     return `${year}${str}${padZ(month)}${str}${padZ(day)}`
 }
+
+// 效验东西
+export const validSome = (exp) => {
+    return function (str) {
+        return exp.test(str)
+    }
+}
