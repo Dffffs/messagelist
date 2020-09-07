@@ -7,6 +7,7 @@
                     ref="upload"
                     action="https://jsonplaceholder.typicode.com/posts/"
                     :file-list="fileList"
+                    :show-file-list="false"
                     :auto-upload="false"
                     :limit="1"
                 >
