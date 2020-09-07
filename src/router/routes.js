@@ -3,6 +3,7 @@ import Login from '../views/Login.vue'
 import Center from '../views/Center.vue'
 import Mine from '../views/Mine.vue'
 import Wrong from '../views/404.vue'
+import Setting from '../views/Setting.vue'
 
 export const routes = [
     {
@@ -24,6 +25,11 @@ export const routes = [
       path: '/wrong',
       name: 'Wrong',
       component: Wrong
+    },
+    {
+      path: '/setting',
+      name: 'Setting',
+      component: Setting
     }
     // {
     //   path: '/about',

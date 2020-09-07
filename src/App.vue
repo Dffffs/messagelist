@@ -43,6 +43,7 @@ export default {
 
     .app-content{
       position: relative;
+      min-width: 840px;
       width: 80vw;
       height: 95vh;
       padding: 10px 20px;

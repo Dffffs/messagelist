@@ -1,5 +1,5 @@
 <template>
-  <div class="forms">
+  <div class="forms" @keyup.enter="submitForm">
     <el-form size="mini" :model="ruleForm" status-icon :rules="rules" ref="ruleForm" class="demo-ruleForm">
       <el-form-item 
         v-for="(item, index) in formItem" 

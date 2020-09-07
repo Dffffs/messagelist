@@ -52,6 +52,10 @@ export default {
     methods:{
         send(){
             let { text, fileList } = this
+            console.log(text, fileList)
+            if (text == '' && !fileList.length) {
+                return this.$message.warning('请填写内容或选择图片后再发送')
+            }
             // 队列promise
             let arr = fileList.map(t => this.uploadImg(t))
             let idTotal = []

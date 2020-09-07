@@ -97,6 +97,7 @@ export default {
     opacity: 0;
   }
   .content{
+    min-width: 225px;
     width: 15vw;
     position: absolute;
     top: 45%;

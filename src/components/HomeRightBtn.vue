@@ -12,7 +12,8 @@
                     <span>{{item.text}}</span>
                 </router-link>
                 <div class="seeMoreOne" @click="bak">
-                    <i class="el-icon-setting"></i>
+                    <!-- <i class="el-icon-setting"></i> -->
+                    <img src="@/assets/signout.png">
                     <span>退出登陆</span>
                 </div>
             </div>
@@ -35,17 +36,27 @@ export default {
             url: '/',
             icon: 'el-icon-school',
             text: '广场'
+        },
+        {
+            url: '/setting',
+            icon: 'el-icon-setting',
+            text: '设置'
         }
       ]
     }),
     methods: {
         bak(){
-            localStorage.clear()
-            this.$router.replace({
-                path:'/login'
-            })
-            location.reload()
+            if (location.pathname.indexOf('login') == -1) {
+                localStorage.clear()
+                this.$router.replace({
+                    path:'/login'
+                })
+                location.reload()
+            }
         }
+    },
+    mounted(){
+        
     }
 }
 </script>
@@ -66,8 +77,7 @@ export default {
         // right: 9vw;
         left: 5px;
         .btnArr{
-            width: 200px;
-            display: flex;
+            // width: 200px;
             .router-link-exact-active{
                 color: #409EFF;
             }
@@ -80,14 +90,19 @@ export default {
                 box-sizing: border-box;
                 font-size: 30px;
                 display: flex;
+                flex-direction: column;
                 padding: 10px 20px;
                 
                 .seeMoreOne{
                     cursor: pointer;
                     display: flex;
                     flex-direction: column;
-                    margin-right: 15px;
+                    margin-bottom: 15px;
                     align-items: center;
+
+                    img{
+                        width: 25px;
+                    }
                 }
                 .seeMoreOne:last-child{
                     margin: 0;
@@ -95,6 +110,7 @@ export default {
                 span{
                     font-size: 13px;
                     margin-top: 5px;
+                    
                 }
             }
         }

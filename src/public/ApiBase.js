@@ -1,5 +1,5 @@
 //初始化Api
-const AV = require('leancloud-storage');
+const AV = require('leancloud-storage/live-query');
 
 AV.init({
     appId: "yiwO01qiqPS0vLB7J0OhU7hP-gzGzoHsz",

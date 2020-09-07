@@ -7,8 +7,12 @@
               class="infinite-list"
               v-infinite-scroll="load"
               infinite-scroll-delay="200">
-              <transition-group name="list" tag="p">
-                  <div v-for="(item,i) in rowData" :key="`${item.time}_${i}`" class="one infinite-list-item">
+              <transition-group name="list-trans" tag="p">
+                  <div 
+                    v-for="(item,i) in rowData" 
+                    :key="`${item.time}_${i}`" 
+                    class="one infinite-list-item list-trans-item"
+                  >
                         <div class="top">
                             <div class="left">
                                 <img :src="item.pic">
@@ -42,7 +46,6 @@
 <script>
 import { AV } from '@/public/ApiBase.js'
 import { formatTime } from '@/public/commonFun.js'
-const AVs = require('leancloud-storage/live-query');
 export default {
     data(){
         return {
@@ -55,6 +58,7 @@ export default {
         }
     },
     computed: { },
+    watch:{},
     methods:{
         formatTime,
         load(){
@@ -62,8 +66,9 @@ export default {
             if (end) {
                 return
             }
-            this.getRowData( limit * i , limit,'add')
+            this.getRowData( skip , limit,'add')
             this.i ++
+            this.skip = limit * i
             console.log('load', this.loading)
         },
         getRowData(skip, limit, type){
@@ -71,9 +76,15 @@ export default {
             // 获取row
             const query = new AV.Query('row');
             let { rowData } = this
-            let data = []
+            let data = [], flag = location.pathname.indexOf('mine') > -1
             // 按 time 时间戳 降序排列
-            query.descending('time');
+            query.descending('createdAt');
+            
+            // 加入查询条件
+            if (flag) {
+                let userid = localStorage.getItem('userId')
+                query.equalTo('userid', userid);
+            }
 
             // 同时获取附件中的文件
             query.include('attachments');
@@ -111,35 +122,49 @@ export default {
             });
         },
         // 订阅消息
-        // subscribe(){
-        //     const query = new AVs.Query('row');
-        //     query.subscribe().then((liveQuery) => {
-        //         // 订阅成功
-        //         liveQuery.on('create', (row) => {
-        //             console.log(row); // 更新作品集
-        //         });
-        //     });
-        // }
+        subscribe(){
+            const query = new AV.Query('row');
+            query.include('attachments');
+            query.subscribe().then((liveQuery) => {
+                // 订阅成功
+                liveQuery.on('create', async (row) => {
+                    let file = await row.fetch({include: 'attachments'})
+                    let obj = {
+                        pic: row.get('pic'), 
+                        text: row.get('text'), 
+                        time: row.get('time'), 
+                        userName: row.get('userName'),
+                        attachment: []
+                    }
+                    let attachments = row.get('attachments')
+                    attachments.forEach((attachment) => {
+                        obj.attachment.push(attachment.get('url'))
+                    });
+                    this.rowData.unshift(obj)
+                });
+            });
+        }
     },
     mounted(){
-        let { skip, limit } = this
-        this.getRowData(skip, limit, 'update')
-        // this.subscribe()
+        this.subscribe()
     }
 }
 </script>
 <style lang="less" scoped>
-    .list-item {
+    //list-trans
+    .list-trans-item {
+        transition: all 1s;
         display: inline-block;
         margin-right: 10px;
+        width: 100%;
     }
-    .list-enter-active, .list-leave-active {
-        transition: all 1s;
-    }
-    .list-enter, .list-leave-to
-    /* .list-leave-active for below version 2.1.8 */ {
+    .list-trans-enter, .list-trans-leave-to
+    /* .list-complete-leave-active for below version 2.1.8 */ {
         opacity: 0;
         transform: translateY(30px);
+    }
+    .list-trans-leave-active {
+        position: absolute;
     }
     .end, .loading{
         text-align: center;
@@ -153,10 +178,17 @@ export default {
         height: 500px;
         .infinite-list{
             height: 100%;
+            display: flex;
+            
+            p{
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+            }
         }
         .one{
             box-sizing: border-box;
-            max-height: 320px;
+            min-height: 120px;
             padding: 10px 15px;
             border: 1px solid #ededed;
             border-radius: 20px;
