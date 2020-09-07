@@ -2,10 +2,19 @@
     <div class="changeUserInfo">
         <div class="content">
             <div class="top">
-                <img src="">
+                <el-upload
+                    class="upload-demo"
+                    ref="upload"
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :file-list="fileList"
+                    :auto-upload="false"
+                    :limit="1"
+                >
+                    <img :src="pic">
+                </el-upload>
             </div>
             <div class="bottom">
-                <el-form label-position="top" :rules="rules" label-width="80px" :model="form">
+                <el-form label-position="left" ref="form" :rules="rules" label-width="80px" :model="form">
                     <el-form-item 
                         v-for="(item, index) in formRow" 
                         :key="index" 
@@ -37,8 +46,13 @@
                             </el-select>
                         </template>
                     </el-form-item>
-                    <el-form-item style="display:flex; justify-content:center;">
-                        <el-button type="primary" size="small" @click="onSubmit">修改</el-button>
+                    <el-form-item>
+                        <el-button 
+                            class="btn"
+                            type="primary" 
+                            size="small" 
+                            @click="onSubmit"
+                        >修改</el-button>
                     </el-form-item>
                 </el-form>
             </div>
@@ -48,11 +62,12 @@
 
 <script>
 // 修改头像, 昵称, 性别, 年龄, email, 手机号
+import { AV } from '@/public/ApiBase.js'
 import { validSome } from '@/public/commonFun.js'
 export default {
     data(){
         let validPhone = (rule, value, callback) => {
-            if (!value.length) {
+            if (!value) {
                 callback(new Error('请输入手机号'));
             } else {
                 let flag = validSome(/^1[34578]\d{9}$/)
@@ -79,9 +94,11 @@ export default {
             }
         }
         return {
+            fileList: [],
+            pic: '',
             form: {
-                sex: 1
-            },
+                sex: '1'
+            }, 
             rules: {
                 roleName: [
                     { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
@@ -117,10 +134,10 @@ export default {
                     option: [
                         {
                             label: '男',
-                            value: 1
+                            value: '1'
                         },{
                             label: '女',
-                            value: 2
+                            value: '2'
                         }
                     ],
                     placeholder: '请选择性别'
@@ -142,8 +159,33 @@ export default {
     },
     methods: {
         onSubmit(){
+            this.$refs['form'].validate((valid) => {
+                if (valid) {
+                    
+                    let { form } = this
+                    // console.log(form)
+                    // 获取对应user表的id为xx的数据
+                    const todo = AV.Object.createWithoutData('_User', '5f55b0fb9d404338cdc28313');
+                    for (let key in form) {
+                        todo.set(key, form[key]);
+                    }
+                    todo.save();
 
+                    this.$message.success('修改成功')
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            });
         }
+    },
+    mounted(){
+        // console.log(localStorage.getItem('userInfo'))
+        let { pic, roleName, age, email, mobilePhoneNumber, sex } = JSON.parse(localStorage.getItem('userInfo'))
+        this.pic = pic
+        // this.fileList.push(pic)
+        let form = { roleName, age, email, mobilePhoneNumber, sex }
+        this.form = form
     }
 }
 </script>
@@ -155,15 +197,44 @@ export default {
         ::v-deep .el-form--label-top .el-form-item__label{
             padding: 0;
         }
+
+        ::v-deep .el-input__inner{
+            border-bottom: 1px solid #ccc;
+            border-top: 0;
+            border-right:0;
+            border-left: 0;
+            border-radius: 0;
+        }
+
+        .btn{
+            margin-left: 50px;
+        }
         .el-form-item{
             margin: 0 0 10px 0;
         }
         .content{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             width: 300px;
             position: absolute;
             top: 45vh;
             left: 50%;
             transform: translate(-50%, -50%);
+
+            .bottom{
+                width: 100%;
+            }
+            .top{
+                margin-bottom: 30px;
+            }
+            img{
+                height: 150px;
+                border: 3px solid #ededed;
+                width: 150px;
+                border-radius: 50%;
+                cursor: pointer;
+            }
         }
     }
 </style>
