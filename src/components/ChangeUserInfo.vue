@@ -2,11 +2,15 @@
     <div class="changeUserInfo">
         <div class="content">
             <div class="top">
+                <!-- <i class="el-icon-close" @click.self="removeChange"></i> -->
                 <el-upload
+                    id="upload"
                     class="upload-demo"
                     ref="upload"
-                    action="https://jsonplaceholder.typicode.com/posts/"
+                    action="#"
                     :file-list="fileList"
+                    :on-change="handleExceed"
+                    :on-exceed="handleExceed"
                     :show-file-list="false"
                     :auto-upload="false"
                     :limit="1"
@@ -64,7 +68,7 @@
 <script>
 // 修改头像, 昵称, 性别, 年龄, email, 手机号
 import { AV } from '@/public/ApiBase.js'
-import { validSome } from '@/public/commonFun.js'
+import { validSome, getBase64 } from '@/public/commonFun.js'
 export default {
     data(){
         let validPhone = (rule, value, callback) => {
@@ -160,16 +164,37 @@ export default {
     },
     methods: {
         onSubmit(){
-            this.$refs['form'].validate((valid) => {
+            this.$refs['form'].validate(async (valid) => {
                 if (valid) {
-                    
-                    let { form } = this
-                    // console.log(form)
-                    // 获取对应user表的id为xx的数据
-                    const todo = AV.Object.createWithoutData('_User', '5f55b0fb9d404338cdc28313');
+                    let userInfo = JSON.parse(localStorage.getItem('userInfo'))
+                    let { pic, form } = this
+                    let file = ''
+                    if (pic != userInfo.pic) {
+                        const data = { base64: pic };
+                        // resume.txt 是文件名
+                        file = new AV.File('resume.txt', data);
+                    }
+                    // 获取对应user表的id为xx的行
+                    const todo = AV.Object.createWithoutData('_User', userInfo.objectId);
+                    if (file) {
+                        let res = await file.save().catch(err => {
+                            console.log(err)
+                        })
+                        todo.set('pic', file.get('url'));
+                        userInfo.pic = file.get('url')
+                    }
                     for (let key in form) {
                         todo.set(key, form[key]);
+                        userInfo[key] = form[key]
                     }
+                    // 设置权限, 其他人可读, 自己可写
+                    let acl = new AV.ACL();
+                    acl.setPublicReadAccess(true);
+                    acl.setWriteAccess(AV.User.current(), true);
+                    todo.setACL(acl);
+
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo))
+                    console.log(userInfo)
                     todo.save();
 
                     this.$message.success('修改成功')
@@ -178,6 +203,16 @@ export default {
                     return false;
                 }
             });
+        },
+        async handleExceed(target, fileList){
+            this.fileList = fileList
+            let res = await getBase64(target.raw || target[0])
+            this.pic = res
+            // console.log(fileList, target)
+        },
+        removeChange(){
+            let { pic } = JSON.parse(localStorage.getItem('userInfo'))
+            this.pic = pic
         }
     },
     mounted(){
@@ -227,7 +262,19 @@ export default {
                 width: 100%;
             }
             .top{
+                position: relative;
                 margin-bottom: 30px;
+
+                i{
+                    position: absolute;
+                    font-size: 25px;
+                    right: -25px;
+                    cursor: pointer;
+                    border-radius: 50%;
+                }
+                i:hover{
+                    color: #409EFF;
+                }
             }
             img{
                 height: 150px;

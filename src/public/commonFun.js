@@ -35,3 +35,29 @@ export const validSome = (exp) => {
         return exp.test(str)
     }
 }
+
+// 图片转base64
+export const getBase64 = function(file) {
+    return new Promise(function (resolve, reject) {
+      let reader = new FileReader()
+      let imgResult = ''
+      reader.readAsDataURL(file)
+      reader.onload = function () {
+        imgResult = reader.result
+      }
+      reader.onerror = function (error) {
+        reject(error)
+      }
+      reader.onloadend = function () {
+        resolve(imgResult)
+      }
+    })
+}
+
+// 设置权限 - 自己可写, 别人可读
+// export const onlyMeWrite = function (rowdata) {
+//     let acl = new AV.ACL();
+//     acl.setPublicReadAccess(true);
+//     acl.setWriteAccess(AV.User.current(), true);
+//     rowdata.setACL(acl);
+// }

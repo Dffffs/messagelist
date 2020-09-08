@@ -34,6 +34,7 @@ export default {
           localStorage.setItem('userId', user.id);
           localStorage.setItem('userInfo', JSON.stringify(user));
 
+          console.log(AV.User.current())
           this.$store.commit('loginInfo', user)
 
           this.$router.replace({

@@ -38,7 +38,7 @@
     </div>
 </template>
 <script>
-import { AV } from '@/public/ApiBase.js'
+import { AV, onlyMeWrite } from '@/public/ApiBase.js'
 export default {
     data(){
         return {
@@ -67,13 +67,18 @@ export default {
                 const row = AV.Object.extend('row');
                 const rowdata = new row();
                 const userName = roleName || username
+                
                 rowdata.set('text', text);
                 rowdata.set('time', new Date().getTime());
                 rowdata.set('userid', objectId);
                 rowdata.set('pic', pic);
                 rowdata.set('userName', userName);
-                // set添加单个数据  add添加数组
-                rowdata.add('attachments', file);
+                rowdata.set('attachments', file);
+                // 设置权限, 其他人可读, 自己可写
+                let acl = new AV.ACL();
+                acl.setPublicReadAccess(true);
+                acl.setWriteAccess(AV.User.current(), true);
+                rowdata.setACL(acl);
 
                 let res = await rowdata.save().catch(err => {
                     console.log(err)
