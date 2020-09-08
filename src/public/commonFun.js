@@ -55,9 +55,9 @@ export const getBase64 = function(file) {
 }
 
 // 设置权限 - 自己可写, 别人可读
-// export const onlyMeWrite = function (rowdata) {
-//     let acl = new AV.ACL();
-//     acl.setPublicReadAccess(true);
-//     acl.setWriteAccess(AV.User.current(), true);
-//     rowdata.setACL(acl);
-// }
+export const onlyMeWrite = function (AV) {
+    let acl = new AV.ACL();
+    acl.setPublicReadAccess(true);
+    acl.setWriteAccess(AV.User.current(), true);
+    return acl
+}

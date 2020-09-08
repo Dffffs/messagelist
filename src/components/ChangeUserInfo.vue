@@ -68,7 +68,7 @@
 <script>
 // 修改头像, 昵称, 性别, 年龄, email, 手机号
 import { AV } from '@/public/ApiBase.js'
-import { validSome, getBase64 } from '@/public/commonFun.js'
+import { validSome, getBase64, onlyMeWrite } from '@/public/commonFun.js'
 export default {
     data(){
         let validPhone = (rule, value, callback) => {
@@ -167,29 +167,28 @@ export default {
             this.$refs['form'].validate(async (valid) => {
                 if (valid) {
                     let userInfo = AV.User.current()
-                    
+                    // 设置权限, 其他人可读, 自己可写
+                    let acl = onlyMeWrite(AV)
+
                     let { pic, form } = this
                     let file = ''
                     if (pic != userInfo.get('pic')) {
                         const data = { base64: pic };
                         // resume.txt 是文件名
-                        file = new AV.File('resume.txt', data);
+                        file = new AV.File(`resume.png`, data);
+                        file.setACL(acl);
                     }
                     // 获取对应user表的id为xx的行
                     const todo = AV.Object.createWithoutData('_User', userInfo.get('objectId'));
+                    for (let key in form) {
+                        todo.set(key, form[key]);
+                    }
                     if (file) {
                         let res = await file.save().catch(err => {
                             console.log(err)
                         })
                         todo.set('pic', file.get('url'));
                     }
-                    for (let key in form) {
-                        todo.set(key, form[key]);
-                    }
-                    // 设置权限, 其他人可读, 自己可写
-                    let acl = new AV.ACL();
-                    acl.setPublicReadAccess(true);
-                    acl.setWriteAccess(AV.User.current(), true);
                     todo.setACL(acl);
                     todo.save();
 
@@ -211,8 +210,9 @@ export default {
             this.pic = pic
         }
     },
-    mounted(){
+    async mounted(){
         let current = AV.User.current()
+        let res = await current.fetch()
         let obj = {
             pic: '', 
             roleName: '', 
@@ -222,11 +222,11 @@ export default {
             sex: ''
         }
         for (let key in obj) {
-            obj[key] = current.get(key)
+            obj[key] = res.get(key)
         }
         this.pic = obj.pic
         this.form = obj
-        console.log(obj)
+        console.log(obj, res)
     }
 }
 </script>
