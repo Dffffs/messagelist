@@ -47,7 +47,7 @@ export default {
         }
     },
     mounted(){
-        console.log(this.$store.state.loginInfo)
+        // console.log(this.$store.state.loginInfo)
     },
     methods:{
         send(){
@@ -62,7 +62,17 @@ export default {
 
             Promise.all(arr).then(async (file) => {
                 // 处理数据将返回来的文件的id保存下来
-                let { objectId, pic, username, roleName } = JSON.parse(localStorage.getItem('userInfo'))
+                let current = AV.User.current()
+                let obj = { 
+                    objectId: '', 
+                    pic: '', 
+                    username: '', 
+                    roleName: '' 
+                }
+                for (let key in obj) {
+                    obj[key] = current.get(key)
+                }
+                let {  objectId, pic, username, roleName } = obj
                 // 存储
                 const row = AV.Object.extend('row');
                 const rowdata = new row();

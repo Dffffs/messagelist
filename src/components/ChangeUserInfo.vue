@@ -166,35 +166,31 @@ export default {
         onSubmit(){
             this.$refs['form'].validate(async (valid) => {
                 if (valid) {
-                    let userInfo = JSON.parse(localStorage.getItem('userInfo'))
+                    let userInfo = AV.User.current()
+                    
                     let { pic, form } = this
                     let file = ''
-                    if (pic != userInfo.pic) {
+                    if (pic != userInfo.get('pic')) {
                         const data = { base64: pic };
                         // resume.txt 是文件名
                         file = new AV.File('resume.txt', data);
                     }
                     // 获取对应user表的id为xx的行
-                    const todo = AV.Object.createWithoutData('_User', userInfo.objectId);
+                    const todo = AV.Object.createWithoutData('_User', userInfo.get('objectId'));
                     if (file) {
                         let res = await file.save().catch(err => {
                             console.log(err)
                         })
                         todo.set('pic', file.get('url'));
-                        userInfo.pic = file.get('url')
                     }
                     for (let key in form) {
                         todo.set(key, form[key]);
-                        userInfo[key] = form[key]
                     }
                     // 设置权限, 其他人可读, 自己可写
                     let acl = new AV.ACL();
                     acl.setPublicReadAccess(true);
                     acl.setWriteAccess(AV.User.current(), true);
                     todo.setACL(acl);
-
-                    localStorage.setItem('userInfo', JSON.stringify(userInfo))
-                    console.log(userInfo)
                     todo.save();
 
                     this.$message.success('修改成功')
@@ -211,17 +207,26 @@ export default {
             // console.log(fileList, target)
         },
         removeChange(){
-            let { pic } = JSON.parse(localStorage.getItem('userInfo'))
+            let pic = AV.User.current().get('pic')
             this.pic = pic
         }
     },
     mounted(){
-        // console.log(localStorage.getItem('userInfo'))
-        let { pic, roleName, age, email, mobilePhoneNumber, sex } = JSON.parse(localStorage.getItem('userInfo'))
-        this.pic = pic
-        // this.fileList.push(pic)
-        let form = { roleName, age, email, mobilePhoneNumber, sex }
-        this.form = form
+        let current = AV.User.current()
+        let obj = {
+            pic: '', 
+            roleName: '', 
+            age: '', 
+            email: '', 
+            mobilePhoneNumber: '', 
+            sex: ''
+        }
+        for (let key in obj) {
+            obj[key] = current.get(key)
+        }
+        this.pic = obj.pic
+        this.form = obj
+        console.log(obj)
     }
 }
 </script>

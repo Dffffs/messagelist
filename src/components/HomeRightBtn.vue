@@ -23,6 +23,7 @@
 </template>
 
 <script>
+import { AV } from '@/public/ApiBase.js'
 export default {
     data: () => ({
       show3: true,
@@ -47,6 +48,7 @@ export default {
     methods: {
         bak(){
             if (location.pathname.indexOf('login') == -1) {
+                AV.User.logOut();
                 localStorage.clear()
                 this.$router.replace({
                     path:'/login'

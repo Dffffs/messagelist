@@ -24,27 +24,26 @@ export default {
     }
   },
   methods:{
+    userlogin(name, password){
+      const { User } = AV 
+      User.logIn(name, password).then((user) => {
+        // 登录成功
+        localStorage.setItem('token', AV.User.current().getSessionToken())
+        this.$router.replace({
+          path: '/'
+        })
+      }, (error) => {
+        this.$message.error(error.rawMessage)
+        console.log(error.rawMessage)
+        // 登录失败（可能是密码错误）
+      });
+    },
     login(forminfo){
       let { componentname } = this 
       let { name, password } = forminfo
-      const { User } = AV 
+      
       if (componentname == 'LoginForm') {
-        User.logIn(name, password).then((user) => {
-          // 登录成功
-          localStorage.setItem('userId', user.id);
-          localStorage.setItem('userInfo', JSON.stringify(user));
-
-          console.log(AV.User.current())
-          this.$store.commit('loginInfo', user)
-
-          this.$router.replace({
-            path: '/'
-          })
-        }, (error) => {
-          this.$message.error(error.rawMessage)
-          console.log(error.rawMessage)
-          // 登录失败（可能是密码错误）
-        });
+        this.userlogin(name, password)
       } else {
         this.sign(forminfo)
       }
@@ -53,23 +52,13 @@ export default {
       let { name, password } = forminfo
       // 创建实例
       const user = new AV.User();
-
-      // 等同于 user.set('username', 'Tom')
       user.setUsername(name);
       user.setPassword(password);
       // 可选
-      // user.setEmail('tom@leancloud.rocks');
-      // user.setMobilePhoneNumber('+8618200008888');
-      // 设置其他属性的方法跟 AV.Object 一样
-      // user.set('gender', 'secret');
       user.signUp().then((user) => {
         // 注册成功
         console.log(`注册成功。objectId：${user.id}`);
-        localStorage.setItem('userId', user.id);
-        localStorage.setItem('userInfo', JSON.stringify(user));
-        this.$router.replace({
-          path: '/'
-        })
+        this.userlogin(name, password)
       }, (error) => {
         // 注册失败（通常是因为用户名已被使用）
         this.$message.error(error.rawMessage)

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import { routes } from './routes'
+import { AV } from '@/public/ApiBase.js'
 
 Vue.use(VueRouter)
 
@@ -9,8 +10,8 @@ const router = new VueRouter({
   mode:"history"
 })
 
-router.beforeEach((to, from, next) => {
-  const userId = localStorage.getItem('userId');
+router.beforeEach(async (to, from, next) => {
+  const userId = AV.User.current()
   if (to.name === 'Login') { // 访问login,缓存判断
     if (userId) { //有缓存，访问主页
       next({ name: 'Center' });

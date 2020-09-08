@@ -82,7 +82,8 @@ export default {
             
             // 加入查询条件
             if (flag) {
-                let userid = localStorage.getItem('userId')
+                // let userid = localStorage.getItem('userId')
+                let userid = AV.User.current().get('objectId')
                 query.equalTo('userid', userid);
             }
 
