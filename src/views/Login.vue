@@ -49,11 +49,12 @@ export default {
       }
     },
     sign(forminfo){
-      let { name, password } = forminfo
+      let { name, password, email } = forminfo
       // 创建实例
       const user = new AV.User();
       user.setUsername(name);
       user.setPassword(password);
+      user.set('email', email)
       // 可选
       user.signUp().then((user) => {
         // 注册成功

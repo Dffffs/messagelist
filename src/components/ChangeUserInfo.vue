@@ -33,6 +33,7 @@
                                 :placeholder="item.placeholder"
                                 size="small"
                                 style="width:100%"
+                                :disabled="item.disabled"
                             ></el-input>
                         </template>
                         <template v-else>
@@ -157,6 +158,7 @@ export default {
                     prop: 'email',
                     type: 'input',
                     vType: 'email',
+                    disabled: true,
                     placeholder: '请输入邮箱'
                 }
             ]

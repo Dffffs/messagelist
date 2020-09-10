@@ -77,6 +77,9 @@ export default {
         .hide{
             display: none
         }
+        .component{
+            height: 100%;
+        }
         .btn{
             display: flex;
             align-items: center;

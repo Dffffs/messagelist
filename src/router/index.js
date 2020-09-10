@@ -11,19 +11,29 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const userId = AV.User.current()
-  if (to.name === 'Login') { // 访问login,缓存判断
-    if (userId) { //有缓存，访问主页
-      next({ name: 'Center' });
-    } else {// 无缓存，跳转登录页
-      next();
+  const currentUser = AV.User.current()
+  if (currentUser) {
+    currentUser.isAuthenticated().then((authenticated) => {
+      if (to.name === 'Login') { // 访问login,缓存判断
+        if (authenticated) { //有缓存，访问主页
+          next({ name: 'Center' });
+        } else {// 无缓存，跳转登录页
+          next();
+        }
+    
+      } else if (to.name !== 'Login' && authenticated) { // 访问非登录页，有缓存，继续跳转该页面
+        next();
+    
+      } else if (to.name !== 'Login' && !authenticated) {
+        next({ name: 'Login' }); // 访问非登录页，无缓存，跳转login
+      }
+    });
+  } else {
+    if (to.name === 'Login') { // 访问login,缓存判断
+      next()
+    } else {
+      next({ name: 'Login' });
     }
-
-  } else if (to.name !== 'Login' && userId) { // 访问非登录页，有缓存，继续跳转该页面
-    next();
-
-  } else if (to.name !== 'Login' && !userId) {
-    next({ name: 'Login' }); // 访问非登录页，无缓存，跳转login
   }
 })
 

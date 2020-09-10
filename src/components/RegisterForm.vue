@@ -6,7 +6,7 @@
 
 <script>
 import forms from './Forms'
-
+import { validSome } from '@/public/commonFun.js'
 export default {
   components:{
     forms
@@ -21,6 +21,20 @@ export default {
         callback();
       }
     };
+    let validEmail = (rule, value, callback) => {
+      // ^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$
+      if (!value) {
+        callback(new Error('请输入邮箱'));
+      } else {
+        let flag = validSome(/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/)
+        console.log(flag(value),value)
+        if (!flag(value)) {
+            callback(new Error('请输入正确的邮箱'));
+        } else {
+            callback();
+        }
+      }
+    }
     return {
       ruleForm:{},
       rules: {
@@ -34,6 +48,9 @@ export default {
         ],
         confirmPassWord: [
           { required: true, validator: validatePass2, trigger: 'blur' }
+        ],
+        email: [
+          { required: true, validator: validEmail, trigger: 'blur' }
         ]
       },
       formItem: [
@@ -52,6 +69,11 @@ export default {
           prop: 'confirmPassWord',
           itemType: 'input',
           type: 'password'
+        },{
+          label: '邮箱',
+          prop: 'email',
+          itemType: 'input',
+          type: 'text'
         }
       ]
     }
