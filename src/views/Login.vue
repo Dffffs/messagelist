@@ -58,7 +58,7 @@ export default {
       // 可选
       user.signUp().then((user) => {
         // 注册成功
-        console.log(`注册成功。objectId：${user.id}`);
+        // console.log(`注册成功。objectId：${user.id}`);
         this.userlogin(name, password)
       }, (error) => {
         // 注册失败（通常是因为用户名已被使用）

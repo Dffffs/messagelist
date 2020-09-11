@@ -7,18 +7,6 @@
                 <el-button type="primary" @click="send">发送邮件</el-button>
             </div>
         </div>
-        <el-dialog
-            title="提示"
-            :visible.sync="dialog"
-            width="30%"
-            :append-to-body="true"
-        >
-            <span>这是一段信息</span>
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="dialog = false">取 消</el-button>
-                <el-button type="primary" @click="dialog = false">确 定</el-button>
-            </span>
-        </el-dialog>
     </div>
 </template>
 
@@ -29,19 +17,20 @@ export default {
     data(){
         return {
             email: '',
-            dialog: false
+            emailVerified: false
         }
     },
     methods: {
-        send(){
-            let { email } = this
+        async send(){
+            let { email, emailVerified } = this
             let flag = validSome(/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/)
             if (flag(email)) {
-                let user = AV.User.current()
-                if (!user.get('emailVerified')) {
-                    this.dialog = !this.dialog
-                    return
+                if (!emailVerified) {
+                    // return this.$message.warning('邮箱验证后才可修改密码。')
+                    return this.notCheckEmail()
                 }
+                let info = AV.User.current()
+                let user = await info.fetch()
                 AV.User.requestPasswordReset(email)
                 .then(res => {
                     this.$message.success('发送成功,重设密码后将强制重新登录.')
@@ -54,9 +43,30 @@ export default {
                 this.$message.error('输入邮箱有误,请重新输入')
             }
         },
+        notCheckEmail(){
+            let { email } = this
+            this.$confirm(`邮箱验证后才可修改密码,是否发送邮件到${email}?`, '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                AV.User.requestEmailVerify(email);
+                this.$message({
+                    type: 'success',
+                    message: '发送邮件成功!'
+                });
+            }).catch(() => {  
+            });
+        },
         handleClose(){
 
         }
+    },
+    async mounted(){
+        let current = AV.User.current()
+        let res = await current.fetch()
+        this.email = res.get('email')
+        this.emailVerified = res.get('emailVerified')
     }
 }
 </script>

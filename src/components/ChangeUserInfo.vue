@@ -53,16 +53,40 @@
                         </template>
                     </el-form-item>
                     <el-form-item>
-                        <el-button 
-                            class="btn"
-                            type="primary" 
-                            size="small" 
-                            @click="onSubmit"
-                        >修改</el-button>
+                        <div class="btns">
+                            <el-button 
+                                class="btn"
+                                type="primary" 
+                                size="small" 
+                                @click="onSubmit"
+                            >修改</el-button>
+                            <el-button
+                                v-if="!emailVerified"
+                                type="primary" 
+                                size="small" 
+                                @click="dialog = true"
+                            >
+                                发送验证邮件
+                            </el-button>
+                        </div>
                     </el-form-item>
                 </el-form>
             </div>
         </div>
+        <el-dialog
+            title="发送邮件"
+            :visible.sync="dialog"
+            width="30%"
+            :append-to-body="true"
+        >
+            <div class="dialogContent">
+                <span>邮箱</span>
+                <div>
+                    <el-input v-model="form.email"></el-input>
+                    <el-button type="primary" @click="sendEmail">发送邮件</el-button>
+                </div>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -77,7 +101,7 @@ export default {
                 callback(new Error('请输入手机号'));
             } else {
                 let flag = validSome(/^1[34578]\d{9}$/)
-                console.log(flag(value),value)
+                // console.log(flag(value),value)
                 if (!flag(value)) {
                     callback(new Error('请输入正确的手机号'));
                 } else {
@@ -91,7 +115,7 @@ export default {
                 callback(new Error('请输入邮箱'));
             } else {
                 let flag = validSome(/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/)
-                console.log(flag(value),value)
+                // console.log(flag(value),value)
                 if (!flag(value)) {
                     callback(new Error('请输入正确的邮箱'));
                 } else {
@@ -105,6 +129,8 @@ export default {
             form: {
                 sex: '1'
             }, 
+            dialog: false,
+            emailVerified: false,
             rules: {
                 roleName: [
                     { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
@@ -168,11 +194,15 @@ export default {
         onSubmit(){
             this.$refs['form'].validate(async (valid) => {
                 if (valid) {
-                    let userInfo = AV.User.current()
+                    let current = AV.User.current()
+                    let userInfo = await current.fetch()
                     // 设置权限, 其他人可读, 自己可写
                     let acl = onlyMeWrite(AV)
 
                     let { pic, form } = this
+                    if (!userInfo.get('emailVerified')) {
+                        return this.$message.warning('邮箱验证后才可编辑个人资料。')
+                    }
                     let file = ''
                     if (pic != userInfo.get('pic')) {
                         const data = { base64: pic };
@@ -196,7 +226,7 @@ export default {
 
                     this.$message.success('修改成功')
                 } else {
-                    console.log('error submit!!');
+                    // console.log('error submit!!');
                     return false;
                 }
             });
@@ -206,6 +236,11 @@ export default {
             let res = await getBase64(target.raw || target[0])
             this.pic = res
             // console.log(fileList, target)
+        },
+        sendEmail(){
+            // console.log('sendEmail')
+            AV.User.requestEmailVerify(this.form.email);
+            this.$message.success('发送验证邮件成功')
         },
         removeChange(){
             let pic = AV.User.current().get('pic')
@@ -226,9 +261,10 @@ export default {
         for (let key in obj) {
             obj[key] = res.get(key)
         }
+        this.emailVerified = res.get('emailVerified')
         this.pic = obj.pic
         this.form = obj
-        console.log(obj, res)
+        // console.log(obj, res)
     }
 }
 </script>
@@ -248,10 +284,15 @@ export default {
             border-left: 0;
             border-radius: 0;
         }
-
-        .btn{
-            margin-left: 50px;
-        }
+        .btns{
+            display: flex;
+            align-items: center;
+            .btn{
+                margin-left: 50px;
+            }
+            
+        }   
+        
         .el-form-item{
             margin: 0 0 10px 0;
         }
@@ -289,6 +330,37 @@ export default {
                 width: 150px;
                 border-radius: 50%;
                 cursor: pointer;
+            }
+        }
+        
+    }
+    ::v-deep .el-dialog__body{
+        // padding: 0;
+    }
+    .dialogContent{
+        // width: 100%;
+        padding: 15px 20px;
+        box-shadow: 0 2px 2px rgba(10, 16, 20, 0.24), 0 0 2px rgba(10, 16, 20, 0.12);
+        border-radius: 5px;
+        border: 1px solid #eee;
+        >span{
+            margin-bottom: 10px;
+            display: block;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        >div{
+            display: flex;
+            align-items: center;
+            ::v-deep .el-input__inner{
+                border-radius: 5px 0px 0px 5px;
+            }
+            input{
+                border-radius: 5px 0px 0px 5px;
+            }
+            button{
+                // margin-left: 50px;
+                border-radius: 0 5px 5px 0;
             }
         }
     }

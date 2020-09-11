@@ -27,7 +27,7 @@ export default {
         callback(new Error('请输入邮箱'));
       } else {
         let flag = validSome(/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/)
-        console.log(flag(value),value)
+        // console.log(flag(value),value)
         if (!flag(value)) {
             callback(new Error('请输入正确的邮箱'));
         } else {

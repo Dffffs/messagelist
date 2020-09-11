@@ -52,7 +52,7 @@ export default {
     methods:{
         send(){
             let { text, fileList } = this
-            console.log(text, fileList)
+            // console.log(text, fileList)
             if (text == '' && !fileList.length) {
                 return this.$message.warning('请填写内容或选择图片后再发送')
             }
@@ -112,7 +112,7 @@ export default {
             this.fileList = fileList
         },
         handlePreview(file) {
-            console.log(file, 'handlePreview');
+            // console.log(file, 'handlePreview');
         },
         handleChange(file, fileList){
             this.fileList = fileList

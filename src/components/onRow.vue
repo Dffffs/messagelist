@@ -69,7 +69,7 @@ export default {
             this.getRowData( skip , limit,'add')
             this.i ++
             this.skip = limit * i
-            console.log('load', this.loading)
+            // console.log('load', this.loading)
         },
         getRowData(skip, limit, type){
             this.loading = true
@@ -112,7 +112,7 @@ export default {
                     });
                     data.push(obj)
                 });
-                console.log(data)
+                // console.log(data)
                 if (type === 'update') {
                     this.rowData = data
                 } else {
