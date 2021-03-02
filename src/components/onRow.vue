@@ -106,7 +106,6 @@ export default {
                         attachment: []
                     }
                     const attachments = res.get('attachments');
-
                     attachments.forEach((attachment) => {
                         obj.attachment.push(attachment.get('url'))
                     });

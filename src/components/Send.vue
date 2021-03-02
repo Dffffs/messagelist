@@ -39,6 +39,7 @@
 </template>
 <script>
 import { AV, onlyMeWrite } from '@/public/ApiBase.js'
+import { onlyMeWrite } from '@/public/commonFun.js'
 export default {
     data(){
         return {
@@ -77,17 +78,16 @@ export default {
                 const row = AV.Object.extend('row');
                 const rowdata = new row();
                 const userName = roleName || username
-                
+                //文本, 创建时间, 用户id, 头像, 用户名, 上传图片, 点赞数
                 rowdata.set('text', text);
                 rowdata.set('time', new Date().getTime());
                 rowdata.set('userid', objectId);
                 rowdata.set('pic', pic);
                 rowdata.set('userName', userName);
                 rowdata.set('attachments', file);
+                rowdata.set('likeNum', 0);
                 // 设置权限, 其他人可读, 自己可写
-                let acl = new AV.ACL();
-                acl.setPublicReadAccess(true);
-                acl.setWriteAccess(AV.User.current(), true);
+                let acl = onlyMeWrite(AV)
                 rowdata.setACL(acl);
 
                 let res = await rowdata.save().catch(err => {
