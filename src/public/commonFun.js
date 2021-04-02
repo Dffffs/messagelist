@@ -61,3 +61,17 @@ export const onlyMeWrite = function (AV) {
     acl.setWriteAccess(AV.User.current(), true);
     return acl
 }
+
+// roleName
+export const getroleName = async function(AV) {
+    // roleName存储到了userOtherInfo中
+    let current = AV.User.current()
+    const userOtherInfo = new AV.Query('userOtherInfo');
+    userOtherInfo.equalTo('author', current);
+    let user = await userOtherInfo.find()
+    let roleName = '';
+    if (user.length) {
+        roleName = user[0].get('roleName')
+    }
+    return roleName
+}

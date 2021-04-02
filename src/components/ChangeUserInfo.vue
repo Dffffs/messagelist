@@ -93,7 +93,7 @@
 <script>
 // 修改头像, 昵称, 性别, 年龄, email, 手机号
 import { AV } from '@/public/ApiBase.js'
-import { validSome, getBase64, onlyMeWrite } from '@/public/commonFun.js'
+import { validSome, getBase64, onlyMeWrite, getroleName } from '@/public/commonFun.js'
 export default {
     data(){
         let validPhone = (rule, value, callback) => {
@@ -204,6 +204,13 @@ export default {
                         return this.$message.warning('邮箱验证后才可编辑个人资料。')
                     }
                     let file = ''
+                    // 用户名保存至userOtherInfo
+                    const userOtherInfo = AV.Object.extend('userOtherInfo');
+                    const info = new userOtherInfo();
+                    info.set('roleName', form.roleName);
+                    info.set('author', current);
+                    info.save()
+
                     if (pic != userInfo.get('pic')) {
                         const data = { base64: pic };
                         // resume.txt 是文件名
@@ -213,7 +220,9 @@ export default {
                     // 获取对应user表的id为xx的行
                     const todo = AV.Object.createWithoutData('_User', userInfo.get('objectId'));
                     for (let key in form) {
-                        todo.set(key, form[key]);
+                        if (key != 'roleName') {
+                            todo.set(key, form[key]);
+                        }
                     }
                     if (file) {
                         let res = await file.save().catch(err => {
@@ -259,8 +268,11 @@ export default {
             sex: ''
         }
         for (let key in obj) {
-            obj[key] = res.get(key)
+            if (res.get(key)) {
+                obj[key] = res.get(key)
+            }
         }
+        obj.roleName = await getroleName(AV)
         this.emailVerified = res.get('emailVerified')
         this.pic = obj.pic
         this.form = obj

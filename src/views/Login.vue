@@ -13,6 +13,8 @@ import { AV } from '@/public/ApiBase.js'
 import LoginForm from '@/components/LoginForm.vue'
 import RegisterForm from '@/components/RegisterForm.vue'
 import { translate } from '@/public/translate.js'
+import { onlyMeWrite } from '@/public/commonFun.js'
+
 export default {
   components: {
     RegisterForm,
@@ -55,6 +57,7 @@ export default {
       user.setUsername(name);
       user.setPassword(password);
       user.set('email', email)
+      
       // 可选
       user.signUp().then((user) => {
         // 注册成功

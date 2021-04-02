@@ -23,7 +23,9 @@
                     :on-remove="handleRemove"
                     :on-change="handleChange"
                     :file-list="fileList"
+                    :before-upload="beforeUpload"
                     :multiple="true"
+                    :accept="accept"
                     :auto-upload="false">
                     <div class="upload-co">
                         <i class="el-icon-picture"></i>
@@ -38,12 +40,14 @@
     </div>
 </template>
 <script>
-import { AV, onlyMeWrite } from '@/public/ApiBase.js'
+import { AV } from '@/public/ApiBase.js'
+import { onlyMeWrite, getroleName } from '@/public/commonFun.js'
 export default {
     data(){
         return {
             text: '',
-            fileList: []
+            fileList: [],
+            accept: '.jpg,.png'
         }
     },
     mounted(){
@@ -58,24 +62,27 @@ export default {
             }
             // 队列promise
             let arr = fileList.map(t => this.uploadImg(t))
-            let idTotal = []
-
             Promise.all(arr).then(async (file) => {
                 // 处理数据将返回来的文件的id保存下来
-                let current = AV.User.current()
+                let current = AV.User.current();
                 let obj = { 
                     objectId: '', 
                     pic: '', 
                     username: '', 
                     roleName: '' 
-                }
+                };
+                obj.roleName = await getroleName(AV);
                 for (let key in obj) {
-                    obj[key] = current.get(key)
+                    if (current.get(key)) {
+                        obj[key] = current.get(key)
+                    }
                 }
                 let {  objectId, pic, username, roleName } = obj
                 // 存储
                 const row = AV.Object.extend('row');
+                const like = AV.Object.extend('likeData')
                 const rowdata = new row();
+                const likeData = new like()
                 const userName = roleName || username
                 
                 rowdata.set('text', text);
@@ -84,16 +91,19 @@ export default {
                 rowdata.set('pic', pic);
                 rowdata.set('userName', userName);
                 rowdata.set('attachments', file);
+
                 // 设置权限, 其他人可读, 自己可写
-                let acl = new AV.ACL();
-                acl.setPublicReadAccess(true);
-                acl.setWriteAccess(AV.User.current(), true);
+                let acl = onlyMeWrite(AV)
                 rowdata.setACL(acl);
 
                 let res = await rowdata.save().catch(err => {
                     console.log(err)
                     this.$message.error('信息存储失败')
-                })
+                });
+                likeData.set('like', false);
+                likeData.set('likeNum', 0);
+                likeData.set('author', res.id);
+                likeData.save()
                 this.$message.success('信息存储成功')
                 // 清空上传文件和内容
                 this.text = ''
@@ -115,7 +125,30 @@ export default {
             // console.log(file, 'handlePreview');
         },
         handleChange(file, fileList){
+            // let typeArr = fileList.filter(t => t.raw.type.indexOf('image') == -1);
+            // if (typeArr.length) {
+            //     return this.$message.warning('请选择图片')
+            // }
             this.fileList = fileList
+        },
+        beforeUpload(file){
+            let testmsg = file.name.substring(file.name.lastIndexOf('.') + 1)
+            const extension = testmsg === 'image'
+            const isLt2M = file.size / 1024 / 1024 < 10
+            if(!extension) {
+                this.$message({
+                    message: '上传文件只能是图片!',
+                    type: 'warning'
+                });
+            }
+            if(!isLt2M) {
+                this.$message({
+                    message: '上传文件大小不能超过 10MB!',
+                    type: 'warning'
+                });
+            }
+            return extension && isLt2M
+
         }
     }
 }

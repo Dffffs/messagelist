@@ -27,9 +27,9 @@
                             </div>
                         </div>
                         <div class="bottom">
-                            <div class="nice">
-                                <img src="@/assets/zan.png" />
-                                <span>0</span>
+                            <div class="nice" @click="likeRow(item)">
+                                <img :src="item.like ? zan : notzan" />
+                                <span>{{item.likeNum}}</span>
                             </div>
                             <!-- <div class="judge">
                                 <img src="" />
@@ -46,9 +46,12 @@
 <script>
 import { AV } from '@/public/ApiBase.js'
 import { formatTime } from '@/public/commonFun.js'
+let zan = require('@/assets/zan.png')
+let notzan = require('@/assets/notzan.png')
 export default {
     data(){
         return {
+            zan, notzan,
             skip: 0, // 跳过的条数
             limit: 10, //拉取多少数据
             i: 1, //第几次拉取数据
@@ -61,6 +64,17 @@ export default {
     watch:{},
     methods:{
         formatTime,
+        async likeRow(row){
+            const query = new AV.Query('likeData');
+            query.equalTo('author', row.id);
+            let res = await query.find()
+            res[0].set('like', !row.like);
+            res[0].increment('likeNum', !row.like ? 1 : -1);
+            res[0].save().then(() => {
+                row.likeNum = !row.like ? row.likeNum + 1 : row.likeNum - 1
+                row.like = !row.like
+            })
+        },
         load(){
             let { i, skip, limit, end } = this
             if (end) {
@@ -70,6 +84,18 @@ export default {
             this.i ++
             this.skip = limit * i
             // console.log('load', this.loading)
+        },
+        async getLikeTarget(){
+            const like = new AV.Query('likeData');
+            let likeArr = await like.find()
+            let likeTarget = {}
+            likeArr.forEach(t => {
+                likeTarget[t.get('author')] = {
+                    like: t.get('like'),
+                    likeNum: t.get('likeNum')
+                }
+            })
+            return likeTarget
         },
         getRowData(skip, limit, type){
             this.loading = true
@@ -92,13 +118,18 @@ export default {
             query.limit(limit);
             query.skip(skip);
 
-            query.find().then((row) => {
+            query.find().then(async (row) => {
                 this.loading = false
                 if (!row.length) {
                     this.end = true
                 }
+                let likeTarget = await this.getLikeTarget()
                 row.forEach((res,i) => {
-                    let obj = { 
+                    let id = res.get('objectId')
+                    let obj = {
+                        id,
+                        like: likeTarget[id].like,
+                        likeNum: likeTarget[id].likeNum, 
                         pic: res.get('pic'), 
                         text: res.get('text'), 
                         time: res.get('time'), 
@@ -112,7 +143,7 @@ export default {
                     });
                     data.push(obj)
                 });
-                // console.log(data)
+                console.log(data)
                 if (type === 'update') {
                     this.rowData = data
                 } else {
@@ -130,7 +161,12 @@ export default {
                 // 订阅成功
                 liveQuery.on('create', async (row) => {
                     let file = await row.fetch({include: 'attachments'})
+                    let likeTarget = await this.getLikeTarget()
+                    let id = row.get('objectId')
                     let obj = {
+                        id,
+                        like: likeTarget[id].like,
+                        likeNum: likeTarget[id].likeNum, 
                         pic: row.get('pic'), 
                         text: row.get('text'), 
                         time: row.get('time'), 
