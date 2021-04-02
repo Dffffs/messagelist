@@ -40,8 +40,13 @@
     </div>
 </template>
 <script>
+<<<<<<< HEAD
 import { AV } from '@/public/ApiBase.js'
 import { onlyMeWrite, getroleName } from '@/public/commonFun.js'
+=======
+import { AV, onlyMeWrite } from '@/public/ApiBase.js'
+import { onlyMeWrite } from '@/public/commonFun.js'
+>>>>>>> f1add36c36e5d060e119e55e0cd0a4009112c087
 export default {
     data(){
         return {
@@ -84,14 +89,13 @@ export default {
                 const rowdata = new row();
                 const likeData = new like()
                 const userName = roleName || username
-                
+                //文本, 创建时间, 用户id, 头像, 用户名, 上传图片, 点赞数
                 rowdata.set('text', text);
                 rowdata.set('time', new Date().getTime());
                 rowdata.set('userid', objectId);
                 rowdata.set('pic', pic);
                 rowdata.set('userName', userName);
                 rowdata.set('attachments', file);
-
                 // 设置权限, 其他人可读, 自己可写
                 let acl = onlyMeWrite(AV)
                 rowdata.setACL(acl);
